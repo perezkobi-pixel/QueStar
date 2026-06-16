@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#12132a">
+<title>קווסטאר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#12132a;
+  --bg-deep:#0a0b1c;
+  --surface:#1d1f44;
+  --surface-2:#272a59;
+  --surface-3:#323571;
+  --border:#34376b;
+  --gold:#ffc857;
+  --gold-deep:#e0a930;
+  --cyan:#4ecdc4;
+  --cyan-deep:#2fa39a;
+  --pink:#ff6f9c;
+  --pink-deep:#e0507e;
+  --blue:#5b8def;
+  --blue-deep:#3f6fd4;
+  --purple:#9b8cff;
+  --purple-deep:#7a68e8;
+  --danger:#ff6b6b;
+  --text:#f4f3ff;
+  --text-dim:#a9abd1;
+  --text-faint:#6f72a0;
+  --r-lg:24px;
+  --r-md:16px;
+  --r-sm:10px;
+  --font-display:'Suez One', serif;
+  --font-body:'Rubik', sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg-deep);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+body::before, body::after{
+  content:'';
+  position:fixed; inset:0;
+  pointer-events:none;
+  background-image:radial-gradient(circle, rgba(255,255,255,.9) 1px, transparent 1.6px);
+  background-size:26px 26px;
+  opacity:.12;
+  z-index:0;
+}
+body::after{
+  background-size:46px 46px;
+  background-position:14px 20px;
+  opacity:.08;
+  animation:twinkle 5s ease-in-out infinite alternate;
+}
+@keyframes twinkle{ from{opacity:.05;} to{opacity:.16;} }
+@media (prefers-reduced-motion:reduce){
+  body::after{animation:none;}
+}
+button{font-family:inherit;}
+input{font-family:inherit;}
+.app-shell{
+  position:relative;
+  z-index:1;
+  max-width:480px;
+  margin:0 auto;
+  min-height:100vh;
+  background:linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 0 80px rgba(0,0,0,.55);
+  overflow-x:hidden;
+}
+.app-content{
+  flex:1 1 auto;
+  padding:16px 16px 100px;
+}
+.center-screen{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  text-align:center;
+  min-height:100vh;
+}
+.hidden{display:none !important;}
+
+/* ---------- typography helpers ---------- */
+.logo{
+  font-family:var(--font-display);
+  font-size:42px;
+  color:var(--gold);
+  text-shadow:0 0 24px rgba(255,200,87,.45);
+  letter-spacing:1px;
+  margin:0 0 4px;
+}
+.subtitle{color:var(--text-dim); font-size:15px; margin:0 0 28px;}
+.section-title{
+  font-family:var(--font-display);
+  font-size:22px;
+  margin:4px 0 14px;
+  color:var(--text);
+}
+
+/* ---------- buttons ---------- */
+.btn{
+  font-weight:700;
+  border-radius:var(--r-md);
+  padding:12px 18px;
+  border:none;
+  cursor:pointer;
+  transition:transform .12s, filter .12s, opacity .12s;
+  font-size:15px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.btn:active{transform:scale(.96);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-deep)); color:#2a1d00;}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),var(--cyan-deep)); color:#06302c;}
+.btn-purple{background:linear-gradient(135deg,var(--purple),var(--purple-deep)); color:#1b1140;}
+.btn-outline{background:transparent; border:2px solid var(--border); color:var(--text);}
+.btn-disabled{background:var(--surface-2); color:var(--text-faint); cursor:not-allowed;}
+.btn-danger{background:rgba(255,107,107,.14); color:var(--danger); border:1px solid rgba(255,107,107,.4);}
+.btn-block{width:100%;}
+.btn-sm{padding:7px 12px; font-size:13px; border-radius:var(--r-sm);}
+.icon-btn{
+  background:var(--surface-2); border:none; color:var(--text-dim);
+  width:38px; height:38px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.icon-btn svg{width:18px;height:18px;}
+.icon-btn:active{transform:scale(.92);}
+
+/* ---------- login screen ---------- */
+.profile-row{display:flex; gap:16px; justify-content:center; margin-bottom:18px; flex-wrap:wrap;}
+.profile-pod{
+  width:128px;
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:16px 10px 14px;
+  cursor:pointer;
+  transition:transform .15s, border-color .15s;
+}
+.profile-pod:active{transform:scale(.95);}
+.profile-pod .avatar-wrap{width:72px;height:72px;margin:0 auto 10px;}
+.profile-pod .pname{font-weight:700; font-size:16px;}
+.profile-pod.pink{border-color:rgba(255,111,156,.4);}
+.profile-pod.pink:active, .profile-pod.pink:hover{border-color:var(--pink);}
+.profile-pod.blue{border-color:rgba(91,141,239,.4);}
+.profile-pod.blue:active, .profile-pod.blue:hover{border-color:var(--blue);}
+.parent-pod{
+  margin-top:10px;
+  display:inline-flex; align-items:center; gap:10px;
+  background:var(--surface);
+  border:2px solid rgba(155,140,255,.35);
+  border-radius:999px;
+  padding:10px 22px;
+  cursor:pointer;
+  color:var(--text-dim);
+  font-weight:600;
+}
+.parent-pod:active{transform:scale(.96);}
+.parent-pod svg{width:20px;height:20px; color:var(--purple);}
+
+/* ---------- passcode screen ---------- */
+.passcode-title{font-weight:700; font-size:18px; margin-bottom:6px;}
+.passcode-sub{color:var(--text-dim); font-size:13px; margin-bottom:22px;}
+.dots-row{display:flex; gap:14px; justify-content:center; margin-bottom:28px;}
+.pdot{width:16px;height:16px;border-radius:50%; border:2px solid var(--border); background:transparent; transition:background .15s, border-color .15s;}
+.pdot.filled{background:var(--gold); border-color:var(--gold);}
+.pdot.err{border-color:var(--danger); background:var(--danger);}
+.keypad{display:grid; grid-template-columns:repeat(3,72px); gap:14px; justify-content:center;}
+.key{
+  width:72px; height:72px; border-radius:50%;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--text); font-size:24px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.key:active{transform:scale(.93); background:var(--surface-2);}
+.key.ghost{background:transparent; border:none; cursor:default;}
+.err-msg{color:var(--danger); font-size:13px; height:18px; margin-top:6px;}
+.room-code{
+  font-family:monospace; font-size:18px; font-weight:700; letter-spacing:1px;
+  background:var(--surface-2); border:1px dashed var(--border); border-radius:var(--r-sm);
+  padding:12px; text-align:center; word-break:break-all; color:var(--gold);
+}
+.setup-hint{color:var(--text-dim); font-size:13px; line-height:1.6; margin:14px 0; max-width:340px;}
+
+/* ---------- header / tab bar ---------- */
+.app-header{
+  flex:0 0 auto;
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px;
+  position:sticky; top:0; z-index:5;
+  background:rgba(18,19,42,.92);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border);
+}
+.app-header .avatar-wrap{width:46px;height:46px; flex:0 0 auto;}
+.header-name{font-weight:700; font-size:16px;}
+.header-stars{
+  display:flex; align-items:center; gap:4px;
+  color:var(--gold); font-weight:800; font-size:14px;
+  background:rgba(255,200,87,.1); padding:4px 10px; border-radius:999px;
+  margin-top:2px;
+}
+.header-stars svg{width:13px;height:13px;}
+.header-spacer{flex:1 1 auto;}
+
+.tab-bar{
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px;
+  display:flex;
+  background:rgba(24,26,54,.97);
+  backdrop-filter:blur(8px);
+  border-top:1px solid var(--border);
+  z-index:6;
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.tab-item{
+  flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:8px 2px; border-radius:14px; cursor:pointer; color:var(--text-faint);
+  position:relative;
+}
+.tab-item svg{width:21px;height:21px;}
+.tab-item.active{color:var(--gold);}
+.tab-item span{font-size:11px; font-weight:600;}
+.tab-badge{
+  position:absolute; top:2px; right:18%;
+  background:var(--danger); color:#fff; font-size:10px; font-weight:800;
+  min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  padding:0 3px;
+}
+
+/* ---------- cards / lists ---------- */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:16px;
+  margin-bottom:14px;
+}
+.cat-card{padding:0; overflow:hidden;}
+.cat-head{
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px; cursor:pointer;
+}
+.cat-icon{
+  width:38px;height:38px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface-2); color:var(--cyan); flex:0 0 auto;
+}
+.cat-icon svg{width:19px;height:19px;}
+.cat-name{font-weight:700; font-size:15px;}
+.pip-row{display:flex; gap:4px; margin-top:5px;}
+.pip{width:8px;height:8px;border-radius:50%; background:var(--surface-3);}
+.pip.filled{background:var(--gold);}
+.cat-chevron{margin-right:auto; color:var(--text-faint); transition:transform .2s;}
+.cat-chevron svg{width:16px;height:16px;}
+.cat-chevron.open{transform:rotate(180deg);}
+.cat-body{padding:0 14px 12px;}
+.task-row{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 4px; border-top:1px solid var(--border);
+}
+.task-name{flex:1 1 auto; font-size:14px;}
+.task-pts{
+  font-size:12px; font-weight:800; color:var(--gold);
+  background:rgba(255,200,87,.12); border-radius:999px; padding:3px 9px;
+  flex:0 0 auto; white-space:nowrap;
+}
+.task-action{flex:0 0 auto;}
+
+/* ---------- stats ---------- */
+.total-box{text-align:center; padding:22px 16px;}
+.total-num{
+  font-family:var(--font-display); font-size:50px; color:var(--gold);
+  text-shadow:0 0 22px rgba(255,200,87,.4); line-height:1;
+}
+.total-lbl{color:var(--text-dim); font-size:13px; margin-top:6px;}
+.bar-track{height:18px; border-radius:999px; background:var(--surface-2); overflow:hidden; margin:8px 0;}
+.bar-fill{height:100%; border-radius:999px; background:linear-gradient(90deg,var(--gold-deep),var(--gold)); transition:width .5s ease;}
+.day-row{display:flex; align-items:center; gap:10px; padding:8px 0;}
+.day-date{font-size:12px; color:var(--text-dim); width:64px; flex:0 0 auto;}
+.day-bar{flex:1 1 auto;}
+.day-val{font-size:12px; font-weight:700; color:var(--gold); width:64px; text-align:left; flex:0 0 auto;}
+
+/* ---------- avatars ---------- */
+.avatar-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+.avatar-card{
+  background:var(--surface); border-radius:var(--r-md); padding:10px 6px;
+  text-align:center; border:2px solid transparent;
+}
+.avatar-card.equipped{border-color:var(--gold); box-shadow:0 0 18px rgba(255,200,87,.3);}
+.avatar-card.locked .avatar-wrap{opacity:.45; filter:grayscale(.4);}
+.avatar-wrap{width:64px;height:64px;margin:0 auto 8px;}
+.avatar-name{font-size:12px; font-weight:700; margin-bottom:4px; min-height:30px; display:flex; align-items:center; justify-content:center;}
+.avatar-cost{font-size:11px; color:var(--gold); font-weight:700; margin-bottom:6px;}
+.avatar-tag{font-size:11px; color:var(--cyan); font-weight:700; margin-bottom:6px;}
+
+/* ---------- prizes ---------- */
+.prize-card{display:flex; align-items:center; gap:12px;}
+.prize-icon{
+  width:44px;height:44px;border-radius:14px; flex:0 0 auto;
+  background:rgba(255,200,87,.12); color:var(--gold);
+  display:flex; align-items:center; justify-content:center;
+}
+.prize-icon svg{width:21px;height:21px;}
+.prize-info{flex:1 1 auto;}
+.prize-name{font-weight:700; font-size:14.5px;}
+.prize-cost{font-size:12.5px; color:var(--text-dim); margin-top:2px;}
+.redemption-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--border);}
+.redemption-info{flex:1 1 auto; font-size:13px;}
+.status-chip{font-size:11px; font-weight:800; border-radius:999px; padding:4px 10px; flex:0 0 auto;}
+.status-pending{background:rgba(78,205,196,.14); color:var(--cyan);}
+.status-done{background:rgba(255,200,87,.14); color:var(--gold);}
+
+/* ---------- parent ---------- */
+.seg{display:flex; background:var(--surface-2); border-radius:999px; padding:4px; margin-bottom:18px;}
+.seg-item{flex:1 1 0; text-align:center; padding:9px 4px; border-radius:999px; font-weight:700; font-size:13.5px; cursor:pointer; color:var(--text-dim);}
+.seg-item.active{background:var(--surface-3); color:var(--text);}
+.child-pick{display:flex; gap:10px; margin-bottom:16px;}
+.child-pick-item{
+  flex:1 1 0; text-align:center; padding:10px 6px; border-radius:var(--r-md);
+  background:var(--surface); border:2px solid var(--border); cursor:pointer; font-weight:700; font-size:14px;
+}
+.child-pick-item.active{border-color:var(--gold); color:var(--gold);}
+.approve-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--border);}
+.approve-info{flex:1 1 auto; font-size:14px;}
+.approve-pts{font-size:12px; color:var(--gold); font-weight:700;}
+.mini-stat{display:flex; justify-content:space-between; padding:7px 0; font-size:14px;}
+.mini-stat b{color:var(--gold);}
+.manage-section{margin-bottom:22px;}
+.manage-row{display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--border);}
+.avatar-edit-block{border-top:1px solid var(--border); padding:8px 0;}
+.avatar-img-actions{display:flex; gap:8px; padding:6px 0 2px 50px;}
+.manage-hint{color:var(--text-faint); font-size:12.5px; padding-bottom:8px;}
+.field{
+  background:var(--surface-2); border:1px solid var(--border); color:var(--text);
+  border-radius:var(--r-sm); padding:8px 10px; font-size:13.5px; width:100%;
+}
+.field-name{flex:1 1 auto;}
+.field-pts{width:64px; flex:0 0 auto; text-align:center;}
+.add-form{display:flex; gap:6px; margin-top:10px;}
+.add-form input{flex:1 1 auto;}
+.code-row{display:flex; align-items:center; gap:10px; padding:8px 0;}
+.code-row label{flex:1 1 auto; font-size:14px; font-weight:600; color:var(--text-dim);}
+.code-row input{width:90px; text-align:center; letter-spacing:3px;}
+.empty-note{color:var(--text-faint); font-size:13px; text-align:center; padding:14px 0;}
+.tag-pink{color:var(--pink);}
+.tag-blue{color:var(--blue);}
+
+.toast{
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+  background:var(--surface-3); color:var(--text); padding:10px 18px;
+  border-radius:999px; font-size:13px; font-weight:600; z-index:50;
+  box-shadow:0 6px 20px rgba(0,0,0,.4);
+  opacity:0; transition:opacity .25s;
+  max-width:90%; text-align:center;
+}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div id="app" class="app-shell"></div>
+<script>
+/* =========================================================
+   קווסטאר — DATA
+   ========================================================= */
+const CATEGORIES = [
+  {id:'org', name:'סדר וארגון', icon:'broom'},
+  {id:'hygiene', name:'היגיינה אישית', icon:'drop'},
+  {id:'study', name:'לימודים', icon:'book'},
+  {id:'home', name:'עזרה בבית', icon:'house'},
+  {id:'fitness', name:'פעילות גופנית', icon:'dumbbell'},
+  {id:'habits', name:'הרגלים חיוביים', icon:'heart'},
+  {id:'bonus', name:'בונוסים', icon:'gift'},
+];
+
+function defaultTasks(){
+  return [
+    {id:'t1', cat:'org', name:'לסדר את החדר', pts:20},
+    {id:'t2', cat:'org', name:'לסדר את המיטה', pts:5},
+    {id:'t3', cat:'org', name:'להכין בגדים למחר', pts:5},
+    {id:'t4', cat:'org', name:'להכין את התיק לבית הספר', pts:5},
+    {id:'t5', cat:'hygiene', name:'לצחצח שיניים בבוקר', pts:5},
+    {id:'t6', cat:'hygiene', name:'לצחצח שיניים בערב', pts:5},
+    {id:'t7', cat:'hygiene', name:'להתקלח', pts:10},
+    {id:'t8', cat:'study', name:'להכין שיעורי בית', pts:20},
+    {id:'t9', cat:'study', name:'לקרוא ספר 20 דקות', pts:10},
+    {id:'t10', cat:'study', name:'לתרגל אנגלית או חשבון 20 דקות', pts:10},
+    {id:'t11', cat:'study', name:'להתכונן למבחן', pts:20},
+    {id:'t12', cat:'home', name:'לערוך שולחן', pts:5},
+    {id:'t13', cat:'home', name:'לפנות כלים מהמדיח', pts:10},
+    {id:'t14', cat:'home', name:'לתלות כביסה', pts:20},
+    {id:'t15', cat:'home', name:'לקפל כביסה', pts:20},
+    {id:'t16', cat:'home', name:'לשאוב/לשטוף רצפה', pts:5},
+    {id:'t17', cat:'home', name:'לעשות מחזור', pts:20},
+    {id:'t18', cat:'home', name:'להשגיח על אילי', pts:10},
+    {id:'t19', cat:'fitness', name:'רכיבה על אופניים', pts:10},
+    {id:'t20', cat:'fitness', name:'ריצה קלה בהליכון', pts:10},
+    {id:'t21', cat:'fitness', name:'כפיפות בטן ושכיבות שמיכה', pts:10},
+    {id:'t22', cat:'fitness', name:'אימון כושר ביוטיוב', pts:10},
+    {id:'t23', cat:'habits', name:'לשתות ליטר וחצי מים ביום', pts:5},
+    {id:'t24', cat:'habits', name:'לישון 10 שעות בלילה', pts:10},
+    {id:'t25', cat:'habits', name:'להגיד משהו טוב אחד לשני', pts:5},
+    {id:'t26', cat:'habits', name:'לעזור למישהו בלי שביקשו', pts:5},
+    {id:'t27', cat:'bonus', name:'יום ללא מסכים', pts:30},
+    {id:'t28', cat:'bonus', name:'מבחן מעל 80', pts:50},
+    {id:'t29', cat:'bonus', name:'לשחק עם אילי משחק/יצירה', pts:10},
+  ];
+}
+
+function defaultPrizes(){
+  return [
+    {id:'p1', name:'שעה נוספת של זמן מסך', cost:400},
+    {id:'p2', name:'בחירת קינוח טעים', cost:800},
+    {id:'p3', name:'יציאה מיוחדת עם אמא או אבא', cost:2000},
+    {id:'p4', name:'מתנה קטנה או דמי כיס', cost:5000},
+  ];
+}
+
+const AVATAR_NAMES = ['פצפוץ','ניצוץ','פצפון','קרינון','זהרורון','כוכביל','ירחיל','שביטון','זוהרן','מטאוריל','גלקטיל','אדיר הכוכבים','קיסר הקוסמוס'];
+const AVATAR_COSTS = [0,20,40,65,95,130,170,215,265,320,380,440,500];
+const AVATAR_PALETTE = [
+  {b:'#a8e6cf', d:'#7cc9a8'},
+  {b:'#8fd3c7', d:'#5fb3a6'},
+  {b:'#7ec8e3', d:'#4fa3c2'},
+  {b:'#6fb1ff', d:'#4a86e0'},
+  {b:'#8c9eff', d:'#6c75e0'},
+  {b:'#b08cff', d:'#8a63e8'},
+  {b:'#cf8cff', d:'#a85fe0'},
+  {b:'#ff8cd9', d:'#e060b0'},
+  {b:'#ff8c9e', d:'#e0607a'},
+  {b:'#ff9c7e', d:'#e0703f'},
+  {b:'#ffb37e', d:'#e08a40'},
+  {b:'#ffd27e', d:'#e0a930'},
+  {b:'#fff2b0', d:'#ffd966'},
+];
+function avatarDefs(){
+  return AVATAR_NAMES.map((name,i)=>({tier:i, name, cost:AVATAR_COSTS[i], hasImg:false}));
+}
+
+function defaultState(){
+  return {
+    parentCode:'0000',
+    tasks: defaultTasks(),
+    prizes: defaultPrizes(),
+    avatars: avatarDefs(),
+    children:{
+      lihi:{ id:'lihi', name:'ליהי', code:'1234', gender:'f', totalStars:0, avatarOwned:[0], avatarEquipped:0, days:{}, avatarPurchases:[], prizeRedemptions:[] },
+      itai:{ id:'itai', name:'איתי', code:'5678', gender:'m', totalStars:0, avatarOwned:[0], avatarEquipped:0, days:{}, avatarPurchases:[], prizeRedemptions:[] },
+    }
+  };
+}
+
+/* =========================================================
+   STATE + SYNC (no Claude account needed)
+   This app syncs between devices using a free, login-free
+   key-value service (kvdb.io). Each "family room" is one
+   bucket there. The room code is stored locally on each
+   device (localStorage) so you only enter/create it once
+   per device, then everything else is automatic.
+   ========================================================= */
+let state = null;
+let saving = false;
+let syncBucket = null;
+const avatarImages = {}; // tier -> dataURL, loaded lazily from the sync backend
+const KVDB_ROOT = 'https://kvdb.io';
+
+function ensureShape(s){
+  const d = defaultState();
+  if(!s) return d;
+  s.tasks = Array.isArray(s.tasks) ? s.tasks : d.tasks;
+  s.prizes = Array.isArray(s.prizes) ? s.prizes : d.prizes;
+  s.avatars = Array.isArray(s.avatars) && s.avatars.length===13 ? s.avatars : d.avatars;
+  s.avatars.forEach(a=>{ if(typeof a.hasImg!=='boolean') a.hasImg=false; });
+  s.parentCode = s.parentCode || d.parentCode;
+  s.children = s.children || {};
+  ['lihi','itai'].forEach(cid=>{
+    const base = d.children[cid];
+    const c = s.children[cid];
+    s.children[cid] = Object.assign({}, base, c||{});
+    if(!Array.isArray(s.children[cid].avatarOwned)) s.children[cid].avatarOwned=[0];
+    if(!s.children[cid].days) s.children[cid].days={};
+    if(!Array.isArray(s.children[cid].avatarPurchases)) s.children[cid].avatarPurchases=[];
+    if(!Array.isArray(s.children[cid].prizeRedemptions)) s.children[cid].prizeRedemptions=[];
+  });
+  return s;
+}
+
+function getSavedBucketId(){
+  try{ return localStorage.getItem('questar_room_code'); }catch(e){ return null; }
+}
+function saveBucketId(id){
+  try{ localStorage.setItem('questar_room_code', id); }catch(e){}
+}
+
+function kvUrl(bucket, key){
+  return KVDB_ROOT + '/' + bucket + (key!==undefined ? ('/' + encodeURIComponent(key)) : '');
+}
+async function kvCreateBucket(){
+  const res = await fetch(KVDB_ROOT + '/', {
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'default_ttl=7776000'
+  });
+  if(!res.ok) throw new Error('create-room failed: '+res.status);
+  const id = (await res.text()).trim();
+  if(!id) throw new Error('create-room: empty id');
+  return id;
+}
+async function kvGet(bucket, key){
+  const res = await fetch(kvUrl(bucket, key));
+  if(res.status===404) return null;
+  if(!res.ok) throw new Error('get failed: '+res.status);
+  return await res.text();
+}
+async function kvSet(bucket, key, value){
+  const res = await fetch(kvUrl(bucket, key), {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:value
+  });
+  if(!res.ok) throw new Error('set failed: '+res.status);
+  return true;
+}
+async function kvDelete(bucket, key){
+  try{ await fetch(kvUrl(bucket, key), {method:'DELETE'}); }catch(e){}
+}
+
+async function saveState(){
+  if(!state || !syncBucket) return;
+  try{
+    saving = true;
+    await kvSet(syncBucket, 'state', JSON.stringify(state));
+  }catch(e){
+    showToast('השמירה לא הסתנכרנה - בדקו חיבור לאינטרנט');
+  }finally{
+    saving = false;
+  }
+}
+
+async function loadAllAvatarImages(onlyMissing){
+  const jobs = state.avatars
+    .filter(a=>a.hasImg && (!onlyMissing || !avatarImages[a.tier]))
+    .map(async a=>{
+      try{
+        const val = await kvGet(syncBucket, 'avimg_'+a.tier);
+        if(val) avatarImages[a.tier]=val;
+      }catch(e){ /* ignore, will retry on next poll */ }
+    });
+  await Promise.all(jobs);
+}
+
+function startPolling(){
+  setInterval(async ()=>{
+    if(saving || !syncBucket) return;
+    try{
+      const raw = await kvGet(syncBucket, 'state');
+      if(raw){
+        const incoming = ensureShape(JSON.parse(raw));
+        const incomingStr = JSON.stringify(incoming);
+        if(incomingStr !== JSON.stringify(state)){
+          state = incoming;
+          await loadAllAvatarImages(true);
+          render();
+        }
+      }
+    }catch(e){ /* offline - keep showing last known data */ }
+  }, 20000);
+}
+
+/* =========================================================
+   UI / NAV STATE (not persisted)
+   ========================================================= */
+let view = 'loading'; // loading | setup | login | passcode | child | parent
+let passTarget = null; // 'lihi' | 'itai' | 'parent'
+let passInput = '';
+let passError = false;
+let currentChild = null;
+let childTab = 'tasks';
+let openCats = {org:true};
+let parentTab = 'dashboard'; // dashboard | manage
+let parentChildSel = 'lihi';
+let manageOpen = {tasks:true, prizes:false, avatars:false, codes:false, sync:false};
+
+let setupMode = 'choose'; // choose | creating | created | join
+let setupError = '';
+let newRoomCode = '';
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function fmtDate(ds){
+  const [y,m,d] = ds.split('-');
+  return d+'/'+m;
+}
+function maxDailyStars(){
+  return state.tasks.reduce((s,t)=>s+t.pts,0);
+}
+function dayData(child, ds){
+  if(!child.days[ds]) child.days[ds] = {tasks:{}};
+  return child.days[ds];
+}
+function dayEarned(child, ds){
+  const dd = child.days[ds];
+  if(!dd) return 0;
+  let sum=0;
+  state.tasks.forEach(t=>{ if(dd.tasks[t.id]==='approved') sum+=t.pts; });
+  return sum;
+}
+function pendingCountToday(child){
+  const dd = child.days[todayStr()];
+  if(!dd) return 0;
+  return Object.values(dd.tasks).filter(v=>v==='pending').length;
+}
+function pendingPrizeCount(child){
+  return child.prizeRedemptions.filter(r=>r.status==='pending').length;
+}
+function lastNDays(n){
+  const out=[];
+  const d = new Date();
+  for(let i=0;i<n;i++){
+    out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));
+    d.setDate(d.getDate()-1);
+  }
+  return out;
+}
+
+/* =========================================================
+   ICONS
+   ========================================================= */
+function ic(name, extra){
+  extra = extra || '';
+  const wrap = (inner)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${inner}</svg>`;
+  const map = {
+    broom:'<line x1="13" y1="2" x2="9" y2="14"/><path d="M5 22l4-9 4 9"/><line x1="6" y1="19" x2="12" y2="19"/>',
+    drop:'<path d="M12 2c4 5 7 9 7 13a7 7 0 11-14 0c0-4 3-8 7-13z"/>',
+    book:'<path d="M4 5c2-1 5-1 8 1 3-2 6-2 8-1v14c-2-1-5-1-8 1-3-2-6-2-8-1V5z"/><line x1="12" y1="6" x2="12" y2="20"/>',
+    house:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
+    dumbbell:'<line x1="4" y1="12" x2="20" y2="12"/><rect x="2" y="9" width="4" height="6" rx="1"/><rect x="18" y="9" width="4" height="6" rx="1"/>',
+    heart:'<path d="M12 21s-8-5.5-8-11a4.5 4.5 0 018-3 4.5 4.5 0 018 3c0 5.5-8 11-8 11z"/>',
+    gift:'<rect x="4" y="9" width="16" height="11" rx="1"/><line x1="4" y1="13" x2="20" y2="13"/><line x1="12" y1="9" x2="12" y2="20"/><path d="M8 9c-1.5 0-3-1-3-3s2-3 3-1.5C9 6 9 9 9 9z"/><path d="M16 9c1.5 0 3-1 3-3s-2-3-3-1.5C15 6 15 9 15 9z"/>',
+    exit:'<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+    trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>',
+    plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>',
+    check:'<polyline points="20 6 9 17 4 12"/>',
+    shield:'<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/>',
+    gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9M4.6 9a1.7 1.7 0 00-.3-1.9M19.4 9a1.7 1.7 0 00.3-1.9M4.6 15a1.7 1.7 0 00-.3 1.9M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2 2M16.4 16.4l2 2M18.4 5.6l-2 2M7.6 16.4l-2 2"/>',
+    chart:'<polyline points="3 17 9 11 13 15 21 6"/><polyline points="14 6 21 6 21 13"/>',
+    chevdown:'<polyline points="6 9 12 15 18 9"/>',
+    close:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  };
+  return wrap(map[name]||'');
+}
+function starIcon(extra){
+  extra = extra || '';
+  return `<svg viewBox="0 0 24 24" fill="currentColor" ${extra}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+}
+
+/* =========================================================
+   AVATAR SVG GENERATOR
+   ========================================================= */
+function avatarVisual(tier){
+  const a = state.avatars.find(x=>x.tier===tier);
+  if(a && a.hasImg && avatarImages[tier]){
+    return `<img src="${avatarImages[tier]}" alt="${escapeAttr(a.name)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">`;
+  }
+  return avatarSVG(tier);
+}
+function avatarSVG(tier){
+  const pal = AVATAR_PALETTE[tier] || AVATAR_PALETTE[0];
+  const hasAntenna = tier>=4;
+  const hasCape = tier>=7;
+  const hasCrown = tier>=10;
+  const hasGlow = tier>=12;
+  let glow='', cape='', antenna='', crown='';
+  if(hasGlow){
+    glow = `<circle cx="50" cy="55" r="42" fill="${pal.b}" opacity="0.35"/>`;
+  }
+  if(hasCape){
+    cape = `<path d="M28 50 C18 65, 18 82, 30 88 C26 75, 30 60, 36 52 Z" fill="${pal.d}" opacity="0.85"/>
+            <path d="M72 50 C82 65, 82 82, 70 88 C74 75, 70 60, 64 52 Z" fill="${pal.d}" opacity="0.85"/>`;
+  }
+  if(hasAntenna){
+    antenna = `<line x1="50" y1="22" x2="50" y2="10" stroke="${pal.d}" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="50" cy="8" r="4.5" fill="${pal.b}" stroke="${pal.d}" stroke-width="2"/>`;
+  }
+  if(hasCrown){
+    crown = `<path d="M36 24 L40 10 L48 20 L50 8 L52 20 L60 10 L64 24 Z" fill="${pal.d}"/>`;
+  }
+  return `<svg viewBox="0 0 100 100" width="100%" height="100%">
+    ${glow}
+    ${cape}
+    <circle cx="50" cy="55" r="33" fill="${pal.b}" stroke="${pal.d}" stroke-width="3"/>
+    ${antenna}
+    ${crown}
+    <ellipse cx="39" cy="52" rx="6" ry="7.5" fill="#28264a"/>
+    <ellipse cx="61" cy="52" rx="6" ry="7.5" fill="#28264a"/>
+    <circle cx="41" cy="49" r="2" fill="#fff"/>
+    <circle cx="63" cy="49" r="2" fill="#fff"/>
+    <path d="M42 66 Q50 73 58 66" stroke="#28264a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <ellipse cx="28" cy="60" rx="5" ry="3.5" fill="${pal.d}" opacity="0.55"/>
+    <ellipse cx="72" cy="60" rx="5" ry="3.5" fill="${pal.d}" opacity="0.55"/>
+  </svg>`;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+function showToast(msg){
+  let t = document.getElementById('toastEl');
+  if(!t){
+    t = document.createElement('div');
+    t.id='toastEl';
+    t.className='toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>{ t.classList.remove('show'); }, 2200);
+}
+
+/* =========================================================
+   RENDER ROOT
+   ========================================================= */
+function render(){
+  const root = document.getElementById('app');
+  if(view==='loading') root.innerHTML = renderLoading();
+  else if(view==='setup') root.innerHTML = renderSetup();
+  else if(view==='login') root.innerHTML = renderLogin();
+  else if(view==='passcode') root.innerHTML = renderPasscode();
+  else if(view==='child') root.innerHTML = renderChild();
+  else if(view==='parent') root.innerHTML = renderParent();
+}
+
+function renderLoading(){
+  return `<div class="center-screen">
+    <div class="logo">קווסטאר</div>
+    <div class="subtitle">מתחברים לחדר המשפחתי...</div>
+  </div>`;
+}
+
+/* ---------- FIRST-TIME SETUP / DEVICE PAIRING ---------- */
+function renderSetup(){
+  if(setupMode==='creating'){
+    return `<div class="center-screen">
+      <div class="logo">קווסטאר</div>
+      <div class="subtitle">מקימים את החדר המשפחתי...</div>
+    </div>`;
+  }
+  if(setupMode==='created'){
+    return `<div class="center-screen">
+      <div class="logo">קווסטאר</div>
+      <div class="subtitle">החדר המשפחתי מוכן! 🎉</div>
+      <div class="card" style="width:100%;">
+        <div style="font-size:13px; color:var(--text-dim); margin-bottom:8px;">קוד החדר שלכם - שמרו אותו:</div>
+        <div class="room-code" id="roomCodeBox">${newRoomCode}</div>
+        <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="copyRoomCode()">העתקת הקוד</button>
+      </div>
+      <div class="setup-hint">בכל מכשיר נוסף שתרצו לחבר (של ליהי, של איתי, או מכשיר נוסף שלכם), בפתיחה הראשונה בחרו "התחברות לחדר קיים" והקלידו את הקוד הזה. ניתן למצוא אותו גם בהמשך באזור ההורים, תחת הגדרות.</div>
+      <button class="btn btn-gold btn-block" style="margin-top:18px;" onclick="confirmCreatedContinue()">המשך לאפליקציה</button>
+    </div>`;
+  }
+  if(setupMode==='join'){
+    return `<div class="center-screen">
+      <div class="logo">קווסטאר</div>
+      <div class="subtitle">התחברות לחדר קיים</div>
+      <input class="field" id="joinCodeInput" placeholder="הקלידו כאן את קוד החדר" style="text-align:center; margin-bottom:10px;">
+      <div class="err-msg">${setupError}</div>
+      <button class="btn btn-gold btn-block" onclick="submitJoinCode()">התחברות</button>
+      <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="setupMode='choose'; setupError=''; render();">חזרה</button>
+    </div>`;
+  }
+  return `<div class="center-screen">
+    <div class="logo">קווסטאר</div>
+    <div class="subtitle">צוברים כוכבים, זוכים בפרסים שווים!</div>
+    <div class="setup-hint">זו הפעלה ראשונה במכשיר הזה. כדי שכל המכשירים יראו את אותם הכוכבים והמשימות, צרו חדר משפחתי אחד ואז התחברו אליו מכל מכשיר נוסף.</div>
+    <div class="err-msg">${setupError}</div>
+    <button class="btn btn-gold btn-block" onclick="startCreateRoom()">הקמת חדר משפחתי חדש</button>
+    <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="setupMode='join'; setupError=''; render();">התחברות לחדר קיים עם קוד</button>
+  </div>`;
+}
+function copyRoomCode(code){
+  const val = code || newRoomCode;
+  try{
+    navigator.clipboard.writeText(val);
+    showToast('הקוד הועתק');
+  }catch(e){ showToast('סמנו והעתיקו את הקוד ידנית'); }
+}
+async function startCreateRoom(){
+  setupMode='creating'; setupError=''; render();
+  try{
+    const id = await kvCreateBucket();
+    syncBucket = id;
+    state = defaultState();
+    await kvSet(syncBucket, 'state', JSON.stringify(state));
+    newRoomCode = id;
+    setupMode='created';
+  }catch(e){
+    setupError = 'לא הצלחנו להקים את החדר. בדקו חיבור לאינטרנט ונסו שוב.';
+    setupMode='choose';
+    syncBucket = null;
+  }
+  render();
+}
+async function submitJoinCode(){
+  const input = document.getElementById('joinCodeInput');
+  const code = (input && input.value || '').trim();
+  if(!code){ setupError='הקלידו קוד'; render(); return; }
+  setupError='';
+  try{
+    const raw = await kvGet(code, 'state');
+    syncBucket = code;
+    if(raw){ state = ensureShape(JSON.parse(raw)); }
+    else { state = defaultState(); await kvSet(code, 'state', JSON.stringify(state)); }
+    saveBucketId(code);
+    await loadAllAvatarImages();
+    view='login';
+    render();
+    startPolling();
+  }catch(e){
+    syncBucket = null;
+    setupError = 'הקוד לא נמצא, או שאין חיבור לאינטרנט. בדקו ונסו שוב.';
+    render();
+  }
+}
+async function confirmCreatedContinue(){
+  saveBucketId(newRoomCode);
+  view='login';
+  render();
+  startPolling();
+}
+
+/* ---------- LOGIN ---------- */
+function renderLogin(){
+  const lihi = state.children.lihi, itai = state.children.itai;
+  return `<div class="center-screen">
+    <div class="logo">קווסטאר</div>
+    <div class="subtitle">צוברים כוכבים, זוכים בפרסים שווים!</div>
+    <div class="profile-row">
+      <div class="profile-pod pink" onclick="selectProfile('lihi')">
+        <div class="avatar-wrap">${avatarVisual(lihi.avatarEquipped)}</div>
+        <div class="pname">${lihi.name}</div>
+      </div>
+      <div class="profile-pod blue" onclick="selectProfile('itai')">
+        <div class="avatar-wrap">${avatarVisual(itai.avatarEquipped)}</div>
+        <div class="pname">${itai.name}</div>
+      </div>
+    </div>
+    <div class="parent-pod" onclick="selectProfile('parent')">
+      ${ic('shield')}
+      <span>אזור הורים</span>
+    </div>
+  </div>`;
+}
+
+/* ---------- PASSCODE ---------- */
+function selectProfile(target){
+  passTarget = target;
+  passInput = '';
+  passError = false;
+  view = 'passcode';
+  render();
+}
+function renderPasscode(){
+  let title, color;
+  if(passTarget==='parent'){ title='קוד הורים'; color='var(--purple)'; }
+  else { title = 'קוד כניסה ל' + state.children[passTarget].name; color = passTarget==='lihi' ? 'var(--pink)' : 'var(--blue)'; }
+  const dots = [0,1,2,3].map(i=>{
+    const filled = i < passInput.length;
+    return `<div class="pdot ${filled?'filled':''} ${passError?'err':''}"></div>`;
+  }).join('');
+  const keys = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+  const keypad = keys.map(k=>{
+    if(k==='') return `<div class="key ghost"></div>`;
+    if(k==='⌫') return `<div class="key" onclick="backspaceDigit()">⌫</div>`;
+    return `<div class="key" onclick="enterDigit('${k}')">${k}</div>`;
+  }).join('');
+  return `<div class="center-screen">
+    <button class="icon-btn" style="position:absolute; top:18px; right:18px;" onclick="goLogin()">${ic('close')}</button>
+    <div class="passcode-title" style="color:${color}">${title}</div>
+    <div class="passcode-sub">הקלידו קוד בן 4 ספרות</div>
+    <div class="dots-row">${dots}</div>
+    <div class="err-msg">${passError?'קוד שגוי, נסו שוב':''}</div>
+    <div class="keypad">${keypad}</div>
+  </div>`;
+}
+function goLogin(){ view='login'; passInput=''; passError=false; render(); }
+function enterDigit(d){
+  if(passInput.length>=4) return;
+  passInput += d;
+  passError = false;
+  if(passInput.length===4) checkPasscode();
+  else render();
+}
+function backspaceDigit(){
+  passInput = passInput.slice(0,-1);
+  passError = false;
+  render();
+}
+function checkPasscode(){
+  let correct;
+  if(passTarget==='parent') correct = state.parentCode;
+  else correct = state.children[passTarget].code;
+  if(passInput===correct){
+    if(passTarget==='parent'){
+      view='parent'; parentTab='dashboard';
+    }else{
+      currentChild = passTarget; childTab='tasks'; openCats={org:true};
+      view='child';
+    }
+    passInput=''; passError=false;
+    render();
+  }else{
+    passError = true;
+    render();
+    setTimeout(()=>{ passInput=''; passError=false; render(); }, 650);
+  }
+}
+function logout(){
+  currentChild=null; passTarget=null; passInput='';
+  view='login';
+  render();
+}
+
+/* ---------- CHILD APP ---------- */
+function renderChild(){
+  const c = state.children[currentChild];
+  const header = `<div class="app-header">
+    <div class="avatar-wrap">${avatarVisual(c.avatarEquipped)}</div>
+    <div>
+      <div class="header-name">${c.name}</div>
+      <div class="header-stars">${starIcon()} ${c.totalStars}</div>
+    </div>
+    <div class="header-spacer"></div>
+    <button class="icon-btn" onclick="logout()">${ic('exit')}</button>
+  </div>`;
+  let body='';
+  if(childTab==='tasks') body = renderTasksTab(c);
+  else if(childTab==='stats') body = renderStatsTab(c);
+  else if(childTab==='avatar') body = renderAvatarTab(c);
+  else if(childTab==='prizes') body = renderPrizesTab(c);
+
+  const tabs = [
+    {id:'tasks', label:'משימות', icon:'check'},
+    {id:'stats', label:'הכוכבים שלי', icon:'chart'},
+    {id:'avatar', label:'אווטאר', icon:'shield'},
+    {id:'prizes', label:'פרסים', icon:'gift'},
+  ];
+  const tabBar = `<div class="tab-bar">${tabs.map(t=>`
+    <div class="tab-item ${childTab===t.id?'active':''}" onclick="setChildTab('${t.id}')">
+      ${ic(t.icon)}<span>${t.label}</span>
+    </div>`).join('')}</div>`;
+
+  return header + `<div class="app-content">${body}</div>` + tabBar;
+}
+function setChildTab(tab){ childTab=tab; render(); }
+
+function renderTasksTab(c){
+  const ds = todayStr();
+  const dd = dayData(c, ds);
+  const pending = pendingCountToday(c);
+  let html = `<div class="section-title">המשימות של היום</div>`;
+  if(pending>0){
+    html += `<div class="card" style="background:rgba(78,205,196,.08); border-color:rgba(78,205,196,.3);">
+      ${ic('clock', 'style="width:16px;height:16px;color:var(--cyan);vertical-align:-3px;"')}
+      <span style="font-size:13.5px;"> ${pending} משימות מחכות לאישור הורה</span>
+    </div>`;
+  }
+  CATEGORIES.forEach(cat=>{
+    const tasks = state.tasks.filter(t=>t.cat===cat.id);
+    if(tasks.length===0) return;
+    const doneCount = tasks.filter(t=>dd.tasks[t.id]==='approved').length;
+    const open = !!openCats[cat.id];
+    const pips = tasks.map(t=>`<div class="pip ${dd.tasks[t.id]==='approved'?'filled':''}"></div>`).join('');
+    html += `<div class="card cat-card">
+      <div class="cat-head" onclick="toggleCat('${cat.id}')">
+        <div class="cat-icon">${ic(cat.icon)}</div>
+        <div>
+          <div class="cat-name">${cat.name}</div>
+          <div class="pip-row">${pips}</div>
+        </div>
+        <div class="cat-chevron ${open?'open':''}">${ic('chevdown')}</div>
+      </div>
+      <div class="cat-body" style="${open?'':'display:none;'}">
+        ${tasks.map(t=>renderTaskRow(t, dd)).join('')}
+      </div>
+    </div>`;
+  });
+  return html;
+}
+function renderTaskRow(t, dd){
+  const status = dd.tasks[t.id];
+  let btn;
+  if(status==='approved') btn = `<button class="btn btn-disabled btn-sm">${ic('check','style="width:14px;height:14px;"')} בוצע</button>`;
+  else if(status==='pending') btn = `<button class="btn btn-disabled btn-sm">${ic('clock','style="width:14px;height:14px;"')} מחכה לאישור</button>`;
+  else btn = `<button class="btn btn-cyan btn-sm" onclick="markTaskDone('${t.id}')">סמן כבוצע</button>`;
+  return `<div class="task-row">
+    <div class="task-name">${t.name}</div>
+    <div class="task-pts">+${t.pts} ${starIcon('style="width:10px;height:10px;vertical-align:-1px;"')}</div>
+    <div class="task-action">${btn}</div>
+  </div>`;
+}
+function toggleCat(id){ openCats[id] = !openCats[id]; render(); }
+function markTaskDone(taskId){
+  const c = state.children[currentChild];
+  const dd = dayData(c, todayStr());
+  if(dd.tasks[taskId]) return;
+  dd.tasks[taskId] = 'pending';
+  saveState();
+  render();
+  showToast('נשלח לאישור ההורה 🎉');
+}
+
+function renderStatsTab(c){
+  const ds = todayStr();
+  const max = maxDailyStars();
+  const earned = dayEarned(c, ds);
+  const pct = max>0 ? Math.min(100, Math.round(earned/max*100)) : 0;
+  const days = lastNDays(7);
+  let html = `<div class="card total-box">
+    <div class="total-num">${c.totalStars}</div>
+    <div class="total-lbl">סה״כ כוכבים</div>
+  </div>`;
+  html += `<div class="section-title">היום</div>
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; font-size:13.5px; color:var(--text-dim); margin-bottom:4px;">
+      <span>${earned} כוכבים</span><span>מתוך ${max} אפשריים</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;"></div></div>
+  </div>`;
+  html += `<div class="section-title">השבוע האחרון</div><div class="card">`;
+  days.forEach(d=>{
+    const e = dayEarned(c, d);
+    const p = max>0 ? Math.min(100, Math.round(e/max*100)) : 0;
+    html += `<div class="day-row">
+      <div class="day-date">${fmtDate(d)}</div>
+      <div class="day-bar bar-track"><div class="bar-fill" style="width:${p}%;"></div></div>
+      <div class="day-val">${e}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderAvatarTab(c){
+  let html = `<div class="section-title">שדרוג אווטאר</div>`;
+  html += `<div class="avatar-grid">`;
+  state.avatars.forEach(a=>{
+    const owned = c.avatarOwned.includes(a.tier);
+    const equipped = c.avatarEquipped === a.tier;
+    const locked = !owned;
+    let action;
+    if(equipped) action = `<div class="avatar-tag">מצויד ✓</div>`;
+    else if(owned) action = `<button class="btn btn-cyan btn-sm btn-block" onclick="equipAvatar(${a.tier})">החלף</button>`;
+    else {
+      const canAfford = c.totalStars >= a.cost;
+      action = `<div class="avatar-cost">${a.cost} ${starIcon('style="width:10px;height:10px;vertical-align:-1px;"')}</div>
+        <button class="btn ${canAfford?'btn-gold':'btn-disabled'} btn-sm btn-block" ${canAfford?`onclick="buyAvatar(${a.tier})"`:'disabled'}>שדרג</button>`;
+    }
+    html += `<div class="avatar-card ${equipped?'equipped':''} ${locked?'locked':''}">
+      <div class="avatar-wrap">${avatarVisual(a.tier)}</div>
+      <div class="avatar-name">${a.name}</div>
+      ${action}
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+function buyAvatar(tier){
+  const c = state.children[currentChild];
+  const a = state.avatars.find(x=>x.tier===tier);
+  if(!a || c.avatarOwned.includes(tier)) return;
+  if(c.totalStars < a.cost) return;
+  c.totalStars -= a.cost;
+  c.avatarOwned.push(tier);
+  c.avatarEquipped = tier;
+  c.avatarPurchases.push({tier, cost:a.cost, date:new Date().toISOString()});
+  saveState();
+  render();
+  showToast('דמות חדשה! 🌟');
+}
+function equipAvatar(tier){
+  const c = state.children[currentChild];
+  if(!c.avatarOwned.includes(tier)) return;
+  c.avatarEquipped = tier;
+  saveState();
+  render();
+}
+
+function renderPrizesTab(c){
+  let html = `<div class="section-title">חנות הפרסים</div>`;
+  state.prizes.forEach(p=>{
+    const canAfford = c.totalStars >= p.cost;
+    html += `<div class="card prize-card">
+      <div class="prize-icon">${ic('gift')}</div>
+      <div class="prize-info">
+        <div class="prize-name">${p.name}</div>
+        <div class="prize-cost">${p.cost} כוכבים</div>
+      </div>
+      <button class="btn ${canAfford?'btn-gold':'btn-disabled'} btn-sm" ${canAfford?`onclick="buyPrize('${p.id}')"`:'disabled'}>קנה פרס</button>
+    </div>`;
+  });
+  const redemptions = c.prizeRedemptions.slice().sort((a,b)=> new Date(b.date)-new Date(a.date));
+  html += `<div class="section-title">פרסים שמומשו</div>`;
+  if(redemptions.length===0){
+    html += `<div class="card empty-note">עדיין לא מימשתם פרסים</div>`;
+  }else{
+    html += `<div class="card">`;
+    redemptions.forEach(r=>{
+      const prize = state.prizes.find(p=>p.id===r.prizeId);
+      html += `<div class="redemption-row">
+        <div class="redemption-info">${prize?prize.name:'פרס'} <span style="color:var(--text-faint);">— ${r.cost} כוכבים</span></div>
+        <div class="status-chip ${r.status==='fulfilled'?'status-done':'status-pending'}">${r.status==='fulfilled'?'מומש ✓':'ממתין ⏳'}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  return html;
+}
+function buyPrize(prizeId){
+  const c = state.children[currentChild];
+  const p = state.prizes.find(x=>x.id===prizeId);
+  if(!p || c.totalStars < p.cost) return;
+  c.totalStars -= p.cost;
+  c.prizeRedemptions.push({id:'r'+Date.now(), prizeId:p.id, cost:p.cost, date:new Date().toISOString(), status:'pending'});
+  saveState();
+  render();
+  showToast('הפרס נשלח להורה לאישור מימוש 🎁');
+}
+
+/* ---------- PARENT APP ---------- */
+function renderParent(){
+  const header = `<div class="app-header">
+    <div class="avatar-wrap" style="background:var(--surface-2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--purple);">${ic('shield')}</div>
+    <div>
+      <div class="header-name">אזור הורים</div>
+    </div>
+    <div class="header-spacer"></div>
+    <button class="icon-btn" onclick="logout()">${ic('exit')}</button>
+  </div>`;
+  const seg = `<div class="seg">
+    <div class="seg-item ${parentTab==='dashboard'?'active':''}" onclick="setParentTab('dashboard')">ניהול יומי</div>
+    <div class="seg-item ${parentTab==='manage'?'active':''}" onclick="setParentTab('manage')">הגדרות</div>
+  </div>`;
+  let body = parentTab==='dashboard' ? renderParentDashboard() : renderParentManage();
+  return header + `<div class="app-content">${seg}${body}</div>`;
+}
+function setParentTab(t){ parentTab=t; render(); }
+function setParentChildSel(id){ parentChildSel=id; render(); }
+
+function renderParentDashboard(){
+  const lihi = state.children.lihi, itai = state.children.itai;
+  const lihiPend = pendingCountToday(lihi) + pendingPrizeCount(lihi);
+  const itaiPend = pendingCountToday(itai) + pendingPrizeCount(itai);
+  const picker = `<div class="child-pick">
+    <div class="child-pick-item ${parentChildSel==='lihi'?'active':''}" onclick="setParentChildSel('lihi')">ליהי ${lihiPend>0?`<span class="tab-badge" style="position:static; display:inline-flex; margin-right:4px;">${lihiPend}</span>`:''}</div>
+    <div class="child-pick-item ${parentChildSel==='itai'?'active':''}" onclick="setParentChildSel('itai')">איתי ${itaiPend>0?`<span class="tab-badge" style="position:static; display:inline-flex; margin-right:4px;">${itaiPend}</span>`:''}</div>
+  </div>`;
+  const c = state.children[parentChildSel];
+  const ds = todayStr();
+  const dd = dayData(c, ds);
+  const max = maxDailyStars();
+  const earned = dayEarned(c, ds);
+
+  let html = picker;
+  html += `<div class="card">
+    <div class="mini-stat"><span>סה״כ כוכבים</span><b>${c.totalStars}</b></div>
+    <div class="mini-stat"><span>נצברו היום</span><b>${earned} / ${max}</b></div>
+  </div>`;
+
+  const pendingTasks = state.tasks.filter(t=>dd.tasks[t.id]==='pending');
+  html += `<div class="section-title">משימות לאישור</div>`;
+  if(pendingTasks.length===0){
+    html += `<div class="card empty-note">אין משימות שמחכות לאישור כרגע</div>`;
+  }else{
+    html += `<div class="card">`;
+    pendingTasks.forEach(t=>{
+      html += `<div class="approve-row">
+        <div class="approve-info">${t.name} <span class="approve-pts">+${t.pts}</span></div>
+        <button class="btn btn-gold btn-sm" onclick="approveTask('${parentChildSel}','${ds}','${t.id}')">אשר</button>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  const pendingPrizes = c.prizeRedemptions.filter(r=>r.status==='pending');
+  html += `<div class="section-title">פרסים שנבחרו — לממש</div>`;
+  if(pendingPrizes.length===0){
+    html += `<div class="card empty-note">אין פרסים שמחכים למימוש</div>`;
+  }else{
+    html += `<div class="card">`;
+    pendingPrizes.forEach(r=>{
+      const p = state.prizes.find(x=>x.id===r.prizeId);
+      html += `<div class="approve-row">
+        <div class="approve-info">${p?p.name:'פרס'} <span class="approve-pts">${r.cost} כוכבים</span></div>
+        <button class="btn btn-gold btn-sm" onclick="fulfillPrize('${parentChildSel}','${r.id}')">פרס מומש</button>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="section-title">רכישות אווטאר</div>`;
+  if(c.avatarPurchases.length===0){
+    html += `<div class="card empty-note">עדיין לא נרכשו דמויות</div>`;
+  }else{
+    const purchases = c.avatarPurchases.slice().sort((a,b)=> new Date(b.date)-new Date(a.date));
+    html += `<div class="card">`;
+    purchases.forEach(pu=>{
+      const av = state.avatars.find(a=>a.tier===pu.tier);
+      html += `<div class="mini-stat"><span>${av?av.name:'אווטאר'}</span><span style="color:var(--text-dim);">−${pu.cost}</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="section-title">היסטוריית פרסים</div>`;
+  const fulfilled = c.prizeRedemptions.filter(r=>r.status==='fulfilled');
+  if(fulfilled.length===0){
+    html += `<div class="card empty-note">עדיין אין פרסים שמומשו</div>`;
+  }else{
+    html += `<div class="card">`;
+    fulfilled.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(r=>{
+      const p = state.prizes.find(x=>x.id===r.prizeId);
+      html += `<div class="mini-stat"><span>${p?p.name:'פרס'}</span><span style="color:var(--gold);">מומש ✓</span></div>`;
+    });
+    html += `</div>`;
+  }
+  return html;
+}
+function approveTask(childId, ds, taskId){
+  const c = state.children[childId];
+  const dd = dayData(c, ds);
+  if(dd.tasks[taskId]!=='pending') return;
+  const t = state.tasks.find(x=>x.id===taskId);
+  dd.tasks[taskId] = 'approved';
+  c.totalStars += t.pts;
+  saveState();
+  render();
+}
+function fulfillPrize(childId, redId){
+  const c = state.children[childId];
+  const r = c.prizeRedemptions.find(x=>x.id===redId);
+  if(!r || r.status==='fulfilled') return;
+  r.status='fulfilled';
+  r.fulfilledDate = new Date().toISOString();
+  saveState();
+  render();
+}
+
+/* ---------- PARENT MANAGE ---------- */
+function toggleManage(sec){ manageOpen[sec] = !manageOpen[sec]; render(); }
+function manageHead(sec, label, icon){
+  const open = manageOpen[sec];
+  return `<div class="cat-head" style="cursor:pointer; padding:0 0 10px;" onclick="toggleManage('${sec}')">
+    <div class="cat-icon">${ic(icon)}</div>
+    <div class="cat-name" style="flex:1;">${label}</div>
+    <div class="cat-chevron ${open?'open':''}">${ic('chevdown')}</div>
+  </div>`;
+}
+function renderParentManage(){
+  let html='';
+
+  // TASKS
+  html += `<div class="manage-section card">`;
+  html += manageHead('tasks','עריכת משימות','check');
+  if(manageOpen.tasks){
+    CATEGORIES.forEach(cat=>{
+      const tasks = state.tasks.filter(t=>t.cat===cat.id);
+      html += `<div style="margin-top:10px; margin-bottom:4px; font-weight:700; font-size:13.5px; color:var(--text-dim);">${cat.name}</div>`;
+      tasks.forEach(t=>{
+        html += `<div class="manage-row">
+          <input class="field field-name" value="${escapeAttr(t.name)}" onchange="updateTaskField('${t.id}','name', this.value)">
+          <input class="field field-pts" type="number" min="0" value="${t.pts}" onchange="updateTaskField('${t.id}','pts', this.value)">
+          <button class="icon-btn" onclick="deleteTask('${t.id}')">${ic('trash')}</button>
+        </div>`;
+      });
+      html += `<div class="add-form">
+        <input class="field" id="newTaskName_${cat.id}" placeholder="משימה חדשה...">
+        <input class="field" style="width:64px;" id="newTaskPts_${cat.id}" type="number" min="0" placeholder="כוכבים">
+        <button class="icon-btn" onclick="addTask('${cat.id}')">${ic('plus')}</button>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+
+  // PRIZES
+  html += `<div class="manage-section card">`;
+  html += manageHead('prizes','עריכת פרסים','gift');
+  if(manageOpen.prizes){
+    state.prizes.forEach(p=>{
+      html += `<div class="manage-row">
+        <input class="field field-name" value="${escapeAttr(p.name)}" onchange="updatePrizeField('${p.id}','name', this.value)">
+        <input class="field field-pts" type="number" min="0" value="${p.cost}" onchange="updatePrizeField('${p.id}','cost', this.value)">
+        <button class="icon-btn" onclick="deletePrize('${p.id}')">${ic('trash')}</button>
+      </div>`;
+    });
+    html += `<div class="add-form">
+      <input class="field" id="newPrizeName" placeholder="פרס חדש...">
+      <input class="field" style="width:64px;" id="newPrizeCost" type="number" min="0" placeholder="כוכבים">
+      <button class="icon-btn" onclick="addPrize()">${ic('plus')}</button>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // AVATARS
+  html += `<div class="manage-section card">`;
+  html += manageHead('avatars','עריכת אווטארים','shield');
+  if(manageOpen.avatars){
+    html += `<div class="manage-hint">אפשר להחליף כל דמות בתמונה משלכם, או לבחור "חזרה לעיצוב המקורי" כדי לחזור לדמות המעוצבת.</div>`;
+    state.avatars.forEach(a=>{
+      const hasCustom = !!a.hasImg;
+      html += `<div class="avatar-edit-block">
+        <div class="manage-row" style="border-top:none;">
+          <div style="width:40px;height:40px;flex:0 0 auto;">${avatarVisual(a.tier)}</div>
+          <input class="field field-name" value="${escapeAttr(a.name)}" onchange="updateAvatarField(${a.tier},'name', this.value)">
+          <input class="field field-pts" type="number" min="0" value="${a.cost}" onchange="updateAvatarField(${a.tier},'cost', this.value)">
+        </div>
+        <div class="avatar-img-actions">
+          <input type="file" accept="image/*" id="avatarImgInput_${a.tier}" style="display:none" onchange="handleAvatarImageUpload(${a.tier}, this)">
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('avatarImgInput_${a.tier}').click()">העלאת תמונה</button>
+          ${hasCustom?`<button class="btn btn-danger btn-sm" onclick="resetAvatarImage(${a.tier})">חזרה לעיצוב המקורי</button>`:''}
+        </div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+
+  // CODES
+  html += `<div class="manage-section card">`;
+  html += manageHead('codes','קודי כניסה','gear');
+  if(manageOpen.codes){
+    html += `<div class="code-row"><label>ליהי</label><input class="field" id="codeLihi" maxlength="4" value="${state.children.lihi.code}"></div>
+    <div class="code-row"><label>איתי</label><input class="field" id="codeItai" maxlength="4" value="${state.children.itai.code}"></div>
+    <div class="code-row"><label>הורים</label><input class="field" id="codeParent" maxlength="4" value="${state.parentCode}"></div>
+    <button class="btn btn-gold btn-block" style="margin-top:8px;" onclick="saveCodes()">שמירת קודים</button>`;
+  }
+  html += `</div>`;
+
+  // SYNC CODE
+  html += `<div class="manage-section card">`;
+  html += manageHead('sync','קוד סנכרון המשפחה','shield');
+  if(manageOpen.sync){
+    html += `<div class="setup-hint" style="margin-top:0;">הקוד הזה מחבר את כל המכשירים לאותם נתונים. כדי לחבר מכשיר נוסף (טאבלט, מכשיר חדש), בפעם הראשונה שפותחים בו את האפליקציה בוחרים "התחברות לחדר קיים" ומקלידים את הקוד הזה. אל תשתפו אותו עם מי שלא צריך - כל מי שמחזיק בו יכול לראות ולשנות את הנתונים.</div>
+    <div class="room-code">${syncBucket||''}</div>
+    <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="copyRoomCode('${syncBucket||''}')">העתקת הקוד</button>`;
+  }
+  html += `</div>`;
+
+  return html;
+}
+function escapeAttr(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+}
+function updateTaskField(id, field, val){
+  const t = state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  if(field==='pts') t.pts = Math.max(0, parseInt(val)||0);
+  else t.name = val;
+  saveState();
+  render();
+}
+function deleteTask(id){
+  state.tasks = state.tasks.filter(t=>t.id!==id);
+  saveState();
+  render();
+}
+function addTask(catId){
+  const nameEl = document.getElementById('newTaskName_'+catId);
+  const ptsEl = document.getElementById('newTaskPts_'+catId);
+  const name = (nameEl.value||'').trim();
+  const pts = Math.max(0, parseInt(ptsEl.value)||0);
+  if(!name) return;
+  state.tasks.push({id:'t'+Date.now(), cat:catId, name, pts});
+  saveState();
+  render();
+}
+function updatePrizeField(id, field, val){
+  const p = state.prizes.find(x=>x.id===id);
+  if(!p) return;
+  if(field==='cost') p.cost = Math.max(0, parseInt(val)||0);
+  else p.name = val;
+  saveState();
+  render();
+}
+function deletePrize(id){
+  state.prizes = state.prizes.filter(p=>p.id!==id);
+  saveState();
+  render();
+}
+function addPrize(){
+  const nameEl = document.getElementById('newPrizeName');
+  const costEl = document.getElementById('newPrizeCost');
+  const name = (nameEl.value||'').trim();
+  const cost = Math.max(0, parseInt(costEl.value)||0);
+  if(!name) return;
+  state.prizes.push({id:'p'+Date.now(), name, cost});
+  saveState();
+  render();
+}
+function updateAvatarField(tier, field, val){
+  const a = state.avatars.find(x=>x.tier===tier);
+  if(!a) return;
+  if(field==='cost') a.cost = Math.max(0, parseInt(val)||0);
+  else a.name = val;
+  saveState();
+  render();
+}
+function handleAvatarImageUpload(tier, inputEl){
+  const file = inputEl.files && inputEl.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){
+    showToast('יש לבחור קובץ תמונה');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const size = 160;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const side = Math.min(img.width, img.height);
+      const sx = (img.width-side)/2, sy = (img.height-side)/2;
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+      let dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      if(dataUrl.length > 14000){
+        dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+      }
+      if(dataUrl.length > 14000){
+        const canvas2 = document.createElement('canvas');
+        canvas2.width = 100; canvas2.height = 100;
+        canvas2.getContext('2d').drawImage(canvas, 0, 0, 100, 100);
+        dataUrl = canvas2.toDataURL('image/jpeg', 0.5);
+      }
+      if(dataUrl.length > 15500){
+        showToast('התמונה גדולה מהצפוי, נסו תמונה אחרת');
+        return;
+      }
+      const a = state.avatars.find(x=>x.tier===tier);
+      if(a){
+        a.hasImg = true;
+        avatarImages[tier] = dataUrl;
+        saveState();
+        render();
+        showToast('התמונה הוחלפה');
+        kvSet(syncBucket, 'avimg_'+tier, dataUrl).catch(()=>{
+          showToast('שמירת התמונה לא הסתנכרנה - בדקו חיבור');
+        });
+      }
+    };
+    img.onerror = function(){ showToast('לא הצלחנו לקרוא את התמונה'); };
+    img.src = e.target.result;
+  };
+  reader.onerror = function(){ showToast('לא הצלחנו לקרוא את הקובץ'); };
+  reader.readAsDataURL(file);
+}
+function resetAvatarImage(tier){
+  const a = state.avatars.find(x=>x.tier===tier);
+  if(!a) return;
+  a.hasImg = false;
+  delete avatarImages[tier];
+  saveState();
+  render();
+  showToast('חזרנו לעיצוב המקורי');
+  kvDelete(syncBucket, 'avimg_'+tier);
+}
+function saveCodes(){
+  const l = document.getElementById('codeLihi').value.trim();
+  const i = document.getElementById('codeItai').value.trim();
+  const p = document.getElementById('codeParent').value.trim();
+  if(l.length===4) state.children.lihi.code = l;
+  if(i.length===4) state.children.itai.code = i;
+  if(p.length===4) state.parentCode = p;
+  saveState();
+  render();
+  showToast('הקודים נשמרו');
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+async function init(){
+  const saved = getSavedBucketId();
+  if(!saved){
+    view='setup'; setupMode='choose';
+    render();
+    return;
+  }
+  syncBucket = saved;
+  view='loading';
+  render();
+  try{
+    const raw = await kvGet(syncBucket, 'state');
+    if(raw){ state = ensureShape(JSON.parse(raw)); }
+    else { state = defaultState(); await kvSet(syncBucket, 'state', JSON.stringify(state)); }
+    await loadAllAvatarImages();
+  }catch(e){
+    state = defaultState();
+    showToast('אין חיבור לרשת כרגע - מציגים נתונים מקומיים');
+  }
+  view='login';
+  render();
+  startPolling();
+}
+init();
+</script>
+
+</body>
+</html>
