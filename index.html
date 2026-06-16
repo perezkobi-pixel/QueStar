@@ -775,10 +775,21 @@ function copyRoomCode(code){
     showToast('הכתובת הועתקה');
   }catch(e){ showToast('סמנו והעתיקו את הכתובת ידנית'); }
 }
+function resetDeviceConnection(){
+  const ok = confirm('לנתק את המכשיר הזה? תועברו למסך הזנת כתובת מחדש. הנתונים עצמם לא יימחקו - רק החיבור של המכשיר הזה יתאפס.');
+  if(!ok) return;
+  try{ localStorage.removeItem('questar_db_url'); }catch(e){}
+  location.reload();
+}
 async function submitDbUrl(){
   const input = document.getElementById('dbUrlInput');
   const url = normalizeDbUrl(input && input.value);
   if(!url){ setupError='הקלידו כתובת'; render(); return; }
+  if(url.indexOf('console.firebase.google.com')!==-1){
+    setupError = 'זו כתובת לעמוד הניהול, לא כתובת מסד הנתונים. חפשו בעמוד את הכתובת שמתחילה ב-https ומסתיימת ב-firebaseio.com (או firebasedatabase.app).';
+    render();
+    return;
+  }
   setupError='';
   setupMode='connecting'; render();
   try{
@@ -1310,7 +1321,9 @@ function renderParentManage(){
   if(manageOpen.sync){
     html += `<div class="setup-hint" style="margin-top:0;">הכתובת הזו מחברת את כל המכשירים לאותם נתונים. כדי לחבר מכשיר נוסף, בפעם הראשונה שפותחים בו את האפליקציה מדביקים בה את הכתובת הזו. אל תשתפו אותה עם מי שלא צריך - כל מי שמחזיק בה יכול לראות ולשנות את הנתונים.</div>
     <div class="room-code">${syncBucket||''}</div>
-    <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="copyRoomCode('${syncBucket||''}')">העתקת הכתובת</button>`;
+    <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="copyRoomCode('${syncBucket||''}')">העתקת הכתובת</button>
+    <div class="setup-hint">אם המכשיר הזה מחובר בטעות לכתובת לא נכונה (לא מסתנכרן עם השאר), אפשר לנתק אותו ולהזין כתובת מחדש - זה משפיע רק על המכשיר הזה, הנתונים עצמם לא נמחקים.</div>
+    <button class="btn btn-danger btn-block" onclick="resetDeviceConnection()">ניתוק המכשיר הזה</button>`;
   }
   html += `</div>`;
 
