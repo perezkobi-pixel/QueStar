@@ -201,6 +201,11 @@ input{font-family:inherit;}
   padding:12px; text-align:center; word-break:break-all; color:var(--gold); direction:ltr;
 }
 .setup-hint{color:var(--text-dim); font-size:13px; line-height:1.6; margin:14px 0; max-width:340px;}
+.conn-footer{
+  position:fixed; bottom:10px; left:50%; transform:translateX(-50%);
+  font-size:10.5px; color:var(--text-faint); direction:ltr; max-width:92%;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;
+}
 
 /* ---------- header / tab bar ---------- */
 .app-header{
@@ -763,7 +768,7 @@ function renderSetup(){
     <div class="logo">קווסטאר</div>
     <div class="subtitle">צוברים כוכבים, זוכים בפרסים שווים!</div>
     <div class="setup-hint">זו הפעלה ראשונה במכשיר הזה. הקלידו כאן את כתובת מסד הנתונים (Firebase Realtime Database) שהקמתם - אם זה המכשיר הראשון, תכתבו לשם את הכתובת שקיבלתם מ-Firebase. בכל מכשיר נוסף, מדביקים כאן בדיוק את אותה כתובת.</div>
-    <input class="field" id="dbUrlInput" placeholder="https://your-project-default-rtdb.firebaseio.com" style="text-align:center; margin-bottom:10px; direction:ltr;">
+    <input class="field" id="dbUrlInput" placeholder="https://your-project-default-rtdb.firebaseio.com" style="text-align:center; margin-bottom:10px; direction:ltr;" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
     <div class="err-msg">${setupError}</div>
     <button class="btn btn-gold btn-block" onclick="submitDbUrl()">חיבור</button>
   </div>`;
@@ -830,6 +835,7 @@ function renderLogin(){
       ${ic('shield')}
       <span>אזור הורים</span>
     </div>
+    <div class="conn-footer" onclick="copyRoomCode('${syncBucket||''}')">מחוברים אל: ${syncBucket||'לא מחובר'}</div>
   </div>`;
 }
 
