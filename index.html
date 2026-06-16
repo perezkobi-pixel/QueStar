@@ -201,11 +201,6 @@ input{font-family:inherit;}
   padding:12px; text-align:center; word-break:break-all; color:var(--gold); direction:ltr;
 }
 .setup-hint{color:var(--text-dim); font-size:13px; line-height:1.6; margin:14px 0; max-width:340px;}
-.conn-footer{
-  position:fixed; bottom:10px; left:50%; transform:translateX(-50%);
-  font-size:10.5px; color:var(--text-faint); direction:ltr; max-width:92%;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;
-}
 
 /* ---------- header / tab bar ---------- */
 .app-header{
@@ -835,7 +830,6 @@ function renderLogin(){
       ${ic('shield')}
       <span>אזור הורים</span>
     </div>
-    <div class="conn-footer" onclick="copyRoomCode('${syncBucket||''}')">מחוברים אל: ${syncBucket||'לא מחובר'}</div>
   </div>`;
 }
 
