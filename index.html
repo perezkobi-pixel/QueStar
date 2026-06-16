@@ -196,9 +196,9 @@ input{font-family:inherit;}
 .key.ghost{background:transparent; border:none; cursor:default;}
 .err-msg{color:var(--danger); font-size:13px; height:18px; margin-top:6px;}
 .room-code{
-  font-family:monospace; font-size:18px; font-weight:700; letter-spacing:1px;
+  font-family:monospace; font-size:13px; font-weight:700; letter-spacing:0;
   background:var(--surface-2); border:1px dashed var(--border); border-radius:var(--r-sm);
-  padding:12px; text-align:center; word-break:break-all; color:var(--gold);
+  padding:12px; text-align:center; word-break:break-all; color:var(--gold); direction:ltr;
 }
 .setup-hint{color:var(--text-dim); font-size:13px; line-height:1.6; margin:14px 0; max-width:340px;}
 
@@ -472,17 +472,15 @@ function defaultState(){
 
 /* =========================================================
    STATE + SYNC (no Claude account needed)
-   This app syncs between devices using a free, login-free
-   key-value service (kvdb.io). Each "family room" is one
-   bucket there. The room code is stored locally on each
-   device (localStorage) so you only enter/create it once
-   per device, then everything else is automatic.
+   This app syncs between devices using your own free
+   Firebase Realtime Database. The database URL is stored
+   locally on each device (localStorage) so you only enter
+   it once per device, then everything else is automatic.
    ========================================================= */
 let state = null;
 let saving = false;
-let syncBucket = null;
+let syncBucket = null; // the family's Firebase Realtime Database URL
 const avatarImages = {}; // tier -> dataURL, loaded lazily from the sync backend
-const KVDB_ROOT = 'https://kvdb.io';
 
 function ensureShape(s){
   const d = defaultState();
@@ -505,47 +503,44 @@ function ensureShape(s){
   return s;
 }
 
-function getSavedBucketId(){
-  try{ return localStorage.getItem('questar_room_code'); }catch(e){ return null; }
+function getSavedDbUrl(){
+  try{ return localStorage.getItem('questar_db_url'); }catch(e){ return null; }
 }
-function saveBucketId(id){
-  try{ localStorage.setItem('questar_room_code', id); }catch(e){}
+function saveDbUrl(url){
+  try{ localStorage.setItem('questar_db_url', url); }catch(e){}
+}
+function normalizeDbUrl(url){
+  return String(url||'').trim().replace(/\/+$/,'');
 }
 
-function kvUrl(bucket, key){
-  return KVDB_ROOT + '/' + bucket + (key!==undefined ? ('/' + encodeURIComponent(key)) : '');
+function fbUrl(base, key){
+  return base + '/' + key + '.json';
 }
-async function kvCreateBucket(){
-  const res = await fetch(KVDB_ROOT + '/', { method:'POST' });
-  if(!res.ok) throw new Error('create-room failed: '+res.status);
-  const id = (await res.text()).trim();
-  if(!id) throw new Error('create-room: empty id');
-  return id;
-}
-async function kvGet(bucket, key){
-  const res = await fetch(kvUrl(bucket, key));
-  if(res.status===404) return null;
+async function kvGet(base, key){
+  const res = await fetch(fbUrl(base, key));
   if(!res.ok) throw new Error('get failed: '+res.status);
-  return await res.text();
+  const text = await res.text();
+  if(text==='null' || text==='') return null;
+  return JSON.parse(text);
 }
-async function kvSet(bucket, key, value){
-  const res = await fetch(kvUrl(bucket, key), {
-    method:'POST',
+async function kvSet(base, key, value){
+  const res = await fetch(fbUrl(base, key), {
+    method:'PUT',
     headers:{'Content-Type':'application/json'},
-    body:value
+    body: JSON.stringify(value)
   });
   if(!res.ok) throw new Error('set failed: '+res.status);
   return true;
 }
-async function kvDelete(bucket, key){
-  try{ await fetch(kvUrl(bucket, key), {method:'DELETE'}); }catch(e){}
+async function kvDelete(base, key){
+  try{ await fetch(fbUrl(base, key), {method:'DELETE'}); }catch(e){}
 }
 
 async function saveState(){
   if(!state || !syncBucket) return;
   try{
     saving = true;
-    await kvSet(syncBucket, 'state', JSON.stringify(state));
+    await kvSet(syncBucket, 'state', state);
   }catch(e){
     showToast('השמירה לא הסתנכרנה - בדקו חיבור לאינטרנט');
   }finally{
@@ -571,7 +566,7 @@ function startPolling(){
     try{
       const raw = await kvGet(syncBucket, 'state');
       if(raw){
-        const incoming = ensureShape(JSON.parse(raw));
+        const incoming = ensureShape(raw);
         const incomingStr = JSON.stringify(incoming);
         if(incomingStr !== JSON.stringify(state)){
           state = incoming;
@@ -597,9 +592,8 @@ let parentTab = 'dashboard'; // dashboard | manage
 let parentChildSel = 'lihi';
 let manageOpen = {tasks:true, prizes:false, avatars:false, codes:false, sync:false};
 
-let setupMode = 'choose'; // choose | creating | created | join
+let setupMode = 'choose'; // choose | connecting
 let setupError = '';
-let newRoomCode = '';
 
 function todayStr(){
   const d = new Date();
@@ -753,99 +747,56 @@ function render(){
 function renderLoading(){
   return `<div class="center-screen">
     <div class="logo">קווסטאר</div>
-    <div class="subtitle">מתחברים לחדר המשפחתי...</div>
+    <div class="subtitle">מתחברים למסד הנתונים המשפחתי...</div>
   </div>`;
 }
 
 /* ---------- FIRST-TIME SETUP / DEVICE PAIRING ---------- */
 function renderSetup(){
-  if(setupMode==='creating'){
+  if(setupMode==='connecting'){
     return `<div class="center-screen">
       <div class="logo">קווסטאר</div>
-      <div class="subtitle">מקימים את החדר המשפחתי...</div>
-    </div>`;
-  }
-  if(setupMode==='created'){
-    return `<div class="center-screen">
-      <div class="logo">קווסטאר</div>
-      <div class="subtitle">החדר המשפחתי מוכן! 🎉</div>
-      <div class="card" style="width:100%;">
-        <div style="font-size:13px; color:var(--text-dim); margin-bottom:8px;">קוד החדר שלכם - שמרו אותו:</div>
-        <div class="room-code" id="roomCodeBox">${newRoomCode}</div>
-        <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="copyRoomCode()">העתקת הקוד</button>
-      </div>
-      <div class="setup-hint">בכל מכשיר נוסף שתרצו לחבר (של ליהי, של איתי, או מכשיר נוסף שלכם), בפתיחה הראשונה בחרו "התחברות לחדר קיים" והקלידו את הקוד הזה. ניתן למצוא אותו גם בהמשך באזור ההורים, תחת הגדרות.</div>
-      <button class="btn btn-gold btn-block" style="margin-top:18px;" onclick="confirmCreatedContinue()">המשך לאפליקציה</button>
-    </div>`;
-  }
-  if(setupMode==='join'){
-    return `<div class="center-screen">
-      <div class="logo">קווסטאר</div>
-      <div class="subtitle">התחברות לחדר קיים</div>
-      <input class="field" id="joinCodeInput" placeholder="הקלידו כאן את קוד החדר" style="text-align:center; margin-bottom:10px;">
-      <div class="err-msg">${setupError}</div>
-      <button class="btn btn-gold btn-block" onclick="submitJoinCode()">התחברות</button>
-      <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="setupMode='choose'; setupError=''; render();">חזרה</button>
+      <div class="subtitle">מתחברים...</div>
     </div>`;
   }
   return `<div class="center-screen">
     <div class="logo">קווסטאר</div>
     <div class="subtitle">צוברים כוכבים, זוכים בפרסים שווים!</div>
-    <div class="setup-hint">זו הפעלה ראשונה במכשיר הזה. כדי שכל המכשירים יראו את אותם הכוכבים והמשימות, צרו חדר משפחתי אחד ואז התחברו אליו מכל מכשיר נוסף.</div>
+    <div class="setup-hint">זו הפעלה ראשונה במכשיר הזה. הקלידו כאן את כתובת מסד הנתונים (Firebase Realtime Database) שהקמתם - אם זה המכשיר הראשון, תכתבו לשם את הכתובת שקיבלתם מ-Firebase. בכל מכשיר נוסף, מדביקים כאן בדיוק את אותה כתובת.</div>
+    <input class="field" id="dbUrlInput" placeholder="https://your-project-default-rtdb.firebaseio.com" style="text-align:center; margin-bottom:10px; direction:ltr;">
     <div class="err-msg">${setupError}</div>
-    <button class="btn btn-gold btn-block" onclick="startCreateRoom()">הקמת חדר משפחתי חדש</button>
-    <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="setupMode='join'; setupError=''; render();">התחברות לחדר קיים עם קוד</button>
+    <button class="btn btn-gold btn-block" onclick="submitDbUrl()">חיבור</button>
   </div>`;
 }
 function copyRoomCode(code){
-  const val = code || newRoomCode;
+  const val = code || syncBucket || '';
   try{
     navigator.clipboard.writeText(val);
-    showToast('הקוד הועתק');
-  }catch(e){ showToast('סמנו והעתיקו את הקוד ידנית'); }
+    showToast('הכתובת הועתקה');
+  }catch(e){ showToast('סמנו והעתיקו את הכתובת ידנית'); }
 }
-async function startCreateRoom(){
-  setupMode='creating'; setupError=''; render();
-  try{
-    const id = await kvCreateBucket();
-    syncBucket = id;
-    state = defaultState();
-    await kvSet(syncBucket, 'state', JSON.stringify(state));
-    newRoomCode = id;
-    setupMode='created';
-  }catch(e){
-    setupError = 'לא הצלחנו להקים את החדר. בדקו חיבור לאינטרנט ונסו שוב.';
-    setupMode='choose';
-    syncBucket = null;
-  }
-  render();
-}
-async function submitJoinCode(){
-  const input = document.getElementById('joinCodeInput');
-  const code = (input && input.value || '').trim();
-  if(!code){ setupError='הקלידו קוד'; render(); return; }
+async function submitDbUrl(){
+  const input = document.getElementById('dbUrlInput');
+  const url = normalizeDbUrl(input && input.value);
+  if(!url){ setupError='הקלידו כתובת'; render(); return; }
   setupError='';
+  setupMode='connecting'; render();
   try{
-    const raw = await kvGet(code, 'state');
-    syncBucket = code;
-    if(raw){ state = ensureShape(JSON.parse(raw)); }
-    else { state = defaultState(); await kvSet(code, 'state', JSON.stringify(state)); }
-    saveBucketId(code);
+    const raw = await kvGet(url, 'state');
+    syncBucket = url;
+    if(raw){ state = ensureShape(raw); }
+    else { state = defaultState(); await kvSet(url, 'state', state); }
+    saveDbUrl(url);
     await loadAllAvatarImages();
     view='login';
     render();
     startPolling();
   }catch(e){
     syncBucket = null;
-    setupError = 'הקוד לא נמצא, או שאין חיבור לאינטרנט. בדקו ונסו שוב.';
+    setupMode='choose';
+    setupError = 'לא הצלחנו להתחבר. בדקו שהכתובת נכונה, שיש חיבור לאינטרנט, ושכללי הגישה (Rules) ב-Firebase מוגדרים לקריאה וכתיבה חופשית.';
     render();
   }
-}
-async function confirmCreatedContinue(){
-  saveBucketId(newRoomCode);
-  view='login';
-  render();
-  startPolling();
 }
 
 /* ---------- LOGIN ---------- */
@@ -1353,13 +1304,13 @@ function renderParentManage(){
   }
   html += `</div>`;
 
-  // SYNC CODE
+  // SYNC URL
   html += `<div class="manage-section card">`;
-  html += manageHead('sync','קוד סנכרון המשפחה','shield');
+  html += manageHead('sync','כתובת מסד הנתונים (סנכרון)','shield');
   if(manageOpen.sync){
-    html += `<div class="setup-hint" style="margin-top:0;">הקוד הזה מחבר את כל המכשירים לאותם נתונים. כדי לחבר מכשיר נוסף (טאבלט, מכשיר חדש), בפעם הראשונה שפותחים בו את האפליקציה בוחרים "התחברות לחדר קיים" ומקלידים את הקוד הזה. אל תשתפו אותו עם מי שלא צריך - כל מי שמחזיק בו יכול לראות ולשנות את הנתונים.</div>
+    html += `<div class="setup-hint" style="margin-top:0;">הכתובת הזו מחברת את כל המכשירים לאותם נתונים. כדי לחבר מכשיר נוסף, בפעם הראשונה שפותחים בו את האפליקציה מדביקים בה את הכתובת הזו. אל תשתפו אותה עם מי שלא צריך - כל מי שמחזיק בה יכול לראות ולשנות את הנתונים.</div>
     <div class="room-code">${syncBucket||''}</div>
-    <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="copyRoomCode('${syncBucket||''}')">העתקת הקוד</button>`;
+    <button class="btn btn-outline btn-block" style="margin-top:10px;" onclick="copyRoomCode('${syncBucket||''}')">העתקת הכתובת</button>`;
   }
   html += `</div>`;
 
@@ -1498,7 +1449,7 @@ function saveCodes(){
    INIT
    ========================================================= */
 async function init(){
-  const saved = getSavedBucketId();
+  const saved = getSavedDbUrl();
   if(!saved){
     view='setup'; setupMode='choose';
     render();
@@ -1509,8 +1460,8 @@ async function init(){
   render();
   try{
     const raw = await kvGet(syncBucket, 'state');
-    if(raw){ state = ensureShape(JSON.parse(raw)); }
-    else { state = defaultState(); await kvSet(syncBucket, 'state', JSON.stringify(state)); }
+    if(raw){ state = ensureShape(raw); }
+    else { state = defaultState(); await kvSet(syncBucket, 'state', state); }
     await loadAllAvatarImages();
   }catch(e){
     state = defaultState();
